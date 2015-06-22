@@ -1,0 +1,124 @@
+<?xml version='1.0'?>
+<project name="teamtwitter" default="help" basedir=".">
+	<property file="build.properties" />
+	<property name="build.dir" value="${basedir}" />
+	<property name="dist.dir" value="${basedir}/dist" />
+	<property name="application.dist.dir" value="${dist.dir}/${applicationName}" />
+	<property name="web.dir" value="${basedir}/web" />
+	<target name="clean">
+		<delete dir="classes" />
+		<mkdir dir="classes" />
+		<delete dir="${dist.dir}" />
+		<mkdir dir="${dist.dir}" />
+		<mkdir dir="${application.dist.dir}" />
+	</target>
+	<target name="compile">
+		<mkdir dir="classes" />
+		<javac srcdir="src" destdir="classes" debug="true" target="1.5" source="1.5">
+			<classpath>
+				<fileset dir="lib">
+					<include name="**.jar" />
+				</fileset>
+			</classpath>
+		</javac>
+	</target>
+	<target name="client.generate-source">
+		<exec executable="python" dir="${clientApplicationDir}">
+			<arg value="generate.py" />
+			<arg value="source-all" />
+		</exec>
+	</target>
+	<target name="client.generate-build">
+		<exec executable="python" dir="${clientApplicationDir}">
+			<arg value="generate.py" />
+			<arg value="build" />
+		</exec>
+	</target>
+	<target name="copy.web" depends="compile, client.generate-build">
+		<!-- copy client application -->
+		<copy todir="${application.dist.dir}">
+			<fileset dir="${clientApplicationDir}/build">
+			</fileset>
+		</copy>
+		<mkdir dir="${application.dist.dir}/WEB-INF" />
+		<!-- copy lib -->
+		<copy todir="${application.dist.dir}/WEB-INF/lib">
+			<fileset dir="${build.dir}/lib">
+				<exclude name="servlet-api.jar" />
+			</fileset>
+		</copy>
+		<!-- copy classes -->
+		<mkdir dir="${application.dist.dir}/WEB-INF/classes" />
+		<copy todir="${application.dist.dir}/WEB-INF/classes">
+			<fileset dir="${build.dir}/classes">
+				<include name="**/*.class" />
+				<exclude name="**/*Test.class" />
+				<exclude name="**/*Tests.class" />
+			</fileset>
+		</copy>
+		<!-- copy WE-INF -->
+		<copy todir="${application.dist.dir}/WEB-INF" >
+			<fileset dir="${build.dir}/webapp/WEB-INF">
+				<include name="**/*" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="copy.web-source" depends="compile, client.generate-source">
+			<!-- copy client application -->
+			<mkdir dir="${application.dist.dir}/source" />
+			<copy todir="${application.dist.dir}/source">
+				<fileset dir="${clientApplicationDir}/source">
+				</fileset>
+			</copy>
+			<!-- copy qooxdoo-sdk -->
+			<mkdir dir="${application.dist.dir}/qooxdoo-sdk" />
+			<copy todir="${application.dist.dir}/qooxdoo-sdk">
+						<fileset dir="${clientApplicationDir}/qooxdoo-sdk">
+						</fileset>
+			</copy>
+			<mkdir dir="${application.dist.dir}/WEB-INF" />
+			<!-- copy lib -->
+			<copy todir="${application.dist.dir}/WEB-INF/lib">
+				<fileset dir="${build.dir}/lib">
+					<exclude name="servlet-api.jar" />
+				</fileset>
+			</copy>
+			<!-- copy classes -->
+			<mkdir dir="${application.dist.dir}/WEB-INF/classes" />
+			<copy todir="${application.dist.dir}/WEB-INF/classes">
+				<fileset dir="${build.dir}/classes">
+					<include name="**/*.class" />
+					<exclude name="**/*Test.class" />
+					<exclude name="**/*Tests.class" />
+				</fileset>
+			</copy>
+			<!-- copy WE-INF -->
+			<copy todir="${application.dist.dir}/WEB-INF">
+				<fileset dir="${build.dir}/webapp/WEB-INF">
+					<include name="**/*" />
+				</fileset>
+			</copy>
+		</target>
+	<!--<target name="dist" depends="copy.web">
+		<war destfile="${dist.dir}/${applicationName}.war" webxml="${application.dist.dir}/WEB-INF/web.xml">
+			<fileset dir="${application.dist.dir}" />
+		</war>
+	</target>
+	<target name="deploy">
+		<copy todir="${deployDir}/${applicationName}">
+			<fileset dir="${application.dist.dir}">
+			</fileset>
+		</copy>
+	</target> -->
+	<target name="help">
+		<echo message="targets available in this build file are:" />
+		<echo message="clean" />
+		<echo message="compile" />
+		<echo message="client.generate-source" />
+		<echo message="client.generate-build" />
+		<echo message="copy.web" />
+		<echo message="copy.web-source" />
+		<!--<echo message="dist" />
+		<echo message="deploy" />-->
+	</target>
+</project>
